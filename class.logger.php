@@ -1,15 +1,18 @@
 <?php
 
-/*
-	Класс для ведения файловых логов.
+/**
+ * class.logger.php Copyright 2014
+ * https://github.com/unlike777/class.logger.php
+ * 
+ * Класс для ведения файловых логов.
 */
 
 class Logger {
 	
-	private $file_name = ''; //путь до файла
-	private $lines = array(); //массив строк
-	private $max_file_size = 1; //максимально допустимый размер файла лога (Мб)
-	private $errors = array(); //массив ошибок
+	private $file_name = '';      //путь до файла
+	private $lines = array();     //массив строк
+	private $max_file_size = 1;   //максимально допустимый размер файла лога (Мб)
+	private $errors = array();    //массив ошибок
 	
 	
 	public function __construct($file_name) {
