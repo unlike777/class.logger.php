@@ -9,19 +9,23 @@ class Logger {
 	private $file_name = ''; //путь до файла
 	private $lines = array(); //массив строк
 	private $max_file_size = 1; //максимально допустимый размер файла лога (Мб)
-	public $error = 0; //номер ошибки
+	private $errors = array(); //массив ошибок
 	
-	//инициализация
+	
 	public function __construct($file_name) {
 		if (empty($file_name)) {
-			$this->error = 1;
+			$this->errors[] = 'Не задан файл лога';
 		}
 
 		$this->file_name = $file_name;
 	}
 	
-	//добавляем в стек строки
-	//$data - может быть или строкой, или массивом
+	/**
+	 * добавляем в стек строки
+	 * 
+	 * @param $data - может быть или строкой, или массивом
+	 * @return $this
+	 */
 	public function add($data) {
 		if (is_array($data)) {
 			array_merge($this->lines, $data);
@@ -31,51 +35,110 @@ class Logger {
 		
 		return $this;
 	}
-	
-	//очищаем стэк строк
+
+	/**
+	 * очищаем стэк строк
+	 * @return $this
+	 */
 	public function clear() {
 		$this->lines = array();
 		
 		return $this;
 	}
-	
-	
-	//сохраняем в файл
-	public function save() {
+
+
+	/**
+	 * Преобразует стек в финальную строку
+	 * убирает символы переноса строк
+	 * 
+	 * @return string
+	 */
+	public function getResult() {
 		if (count($this->lines) == 0) {
-			$this->error = 2;	
+			$this->errors[] = 'Нечего сохранять';
+			return '';
 		}
 		
-		if (empty($this->error)) {
-			
-			$result = '';
-			
-			foreach ($this->lines as $line) {
-				$line = str_replace(array("\n", "\r", "\r\n"), "", $line);
-				$result .= $line."\n";
-			}
-			
-			if ($this->max_file_size > 0) {
-				if (@filesize($this->file_name) >= 1024*1024*$this->max_file_size) {
-					$i = 1;
-					while (file_exists($this->file_name.'.'.$i)) {
-						$i++;
-					}
-					rename($this->file_name, $this->file_name.'.'.$i);
+		$result = '';
+
+		foreach ($this->lines as $line) {
+			$line = str_replace(array("\n", "\r", "\r\n"), "", $line);
+			$result .= $line."\n";
+		}
+		
+		return $result;
+	}
+
+	/**
+	 * проверяет файл лога, если файл превышает допустимый размер переменовывает его
+	 * @return $this
+	 */
+	public function checkFile() {
+		if ($this->max_file_size > 0) {
+			if (@filesize($this->file_name) >= 1024*1024*$this->max_file_size) {
+				$i = 1;
+				while (file_exists($this->file_name.'.'.$i)) {
+					$i++;
+				}
+				if (@!rename($this->file_name, $this->file_name.'.'.$i)) {
+					$this->errors[] = 'Доступ на редактирования файлов закрыт';
 				}
 			}
-			
-			$file = @fopen($this->file_name, "a");
-			@fwrite ($file, $result);
-			@fclose ($file);
-			
-			$this->clear();
-			
-			return true;
-		} else {
+		}
+		
+		return $this;
+	}
+	
+	/**
+	 * сохраняем в файл
+	 * @return bool
+	 */
+	public function save() {
+
+		$result = $this->getResult();
+		$this->checkFile();
+
+		if ($this->issetErrors()) {
 			return false;
 		}
+		
+		if ( !($file = @fopen($this->file_name, "a")) ) {
+			$this->errors[] = 'Досутп на создание файлов закрыт';
+			return false;
+		}
+		
+		@fwrite ($file, $result);
+		@fclose ($file);
+		
+		$this->clear();
+		
+		return true;
 	}
+
+	/**
+	 * Проверяет наличие ошибок
+	 * @return bool
+	 */
+	public function issetErrors() {
+		return $this->errors ? true : false;
+	}
+	
+	/**
+	 * Возвращает массив ошибок
+	 * @return array
+	 */
+	public function errors() {
+		return $this->errors;
+	}
+
+	/**
+	 * Возвращает первую ошибку
+	 * @return string
+	 */
+	public function firstError() {
+		return $this->issetErrors() ? $this->errors[0] : '';
+	}
+	
 }
 
 ?>
