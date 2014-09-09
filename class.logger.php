@@ -106,11 +106,15 @@ class Logger {
 		}
 		
 		if ( !($file = @fopen($this->file_name, "a")) ) {
-			$this->errors[] = 'Досутп на создание файлов закрыт';
+			$this->errors[] = 'Доступ на создание файлов закрыт';
 			return false;
 		}
 		
-		@fwrite ($file, $result);
+		if (@fwrite ($file, $result) === false) {
+			$this->errors[] = 'Записать в файл не удалось';
+			return false;
+		}
+		
 		@fclose ($file);
 		
 		$this->clear();
