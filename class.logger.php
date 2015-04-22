@@ -38,6 +38,32 @@ class Logger {
 		
 		return $this;
 	}
+	
+	/**
+	 * Доавляет ассоциативный массив в лог
+	 * рекурсивно
+	 * 
+	 * @param $data
+	 * @param string $tab - префикс перед строками 
+	 */
+	public function addArr($data, $tab = '') {
+		if (is_array($data)) {
+			
+			foreach ($data as $key => $val) {
+				
+				if (is_array($val)) {
+					$this->add($key.': ');
+					$this->addArr($val, $tab."\t");
+				} else {
+					$this->add($tab.$key.': '.$val);
+				}
+				
+			}
+			
+		} else {
+			$this->add($tab.$data);
+		}
+	}
 
 	/**
 	 * очищаем стэк строк
