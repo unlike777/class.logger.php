@@ -52,7 +52,7 @@ class Logger {
 			foreach ($data as $key => $val) {
 				
 				if (is_array($val)) {
-					$this->add($key.': ');
+					$this->add($tab.$key.': ');
 					$this->addArr($val, $tab."\t");
 				} else {
 					$this->add($tab.$key.': '.$val);
