@@ -63,6 +63,8 @@ class Logger {
 		} else {
 			$this->add($tab.$data);
 		}
+		
+		return $this;
 	}
 
 	/**
