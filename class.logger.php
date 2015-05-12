@@ -12,6 +12,7 @@ class Logger {
 	private $file_name = '';      //путь до файла
 	private $lines = array();     //массив строк
 	private $max_file_size = 1;   //максимально допустимый размер файла лога (Мб)
+	private $max_files = 5;   	  //максимально допустимое кол-во файлов (ротация)
 	private $errors = array();    //массив ошибок
 	
 	
@@ -19,8 +20,21 @@ class Logger {
 		if (empty($file_name)) {
 			$this->errors[] = 'Не задан файл лога';
 		}
-
-		$this->file_name = $file_name;
+		
+		$file_name = trim($file_name);
+		$file_name = str_replace(self::root(), '', $file_name);
+		$file_name = trim($file_name);
+		
+		if (substr($file_name, 0, 1) == '/') {
+			$file_name = substr($file_name, 1);
+		}
+		
+		$this->file_name = self::root().'/'.$file_name;
+	}
+	
+	//вернет путь к корню сайта
+	private static function root() {
+		return getcwd();
 	}
 	
 	/**
@@ -111,7 +125,19 @@ class Logger {
 				while (file_exists($this->file_name.'.'.$i)) {
 					$i++;
 				}
-				if (@!rename($this->file_name, $this->file_name.'.'.$i)) {
+				
+				for ($j = $i; $j > 0; $j--) {
+					if (@!rename($this->file_name.'.'.$j, $this->file_name.'.'.($j+1))) {
+						$this->errors[] = 'Доступ на редактирования файлов закрыт';
+					}
+					
+					//удаляем файл если перваышем допустимый лимит на кол-во логов
+					if ($j > $this->max_files) {
+						@unlink($this->file_name.'.'.($j+1));
+					}
+				}
+				
+				if (@!rename($this->file_name, $this->file_name.'.1')) {
 					$this->errors[] = 'Доступ на редактирования файлов закрыт';
 				}
 			}
