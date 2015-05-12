@@ -12,7 +12,7 @@ class Logger {
 	private $file_name = '';      //путь до файла
 	private $lines = array();     //массив строк
 	private $max_file_size = 1;   //максимально допустимый размер файла лога (Мб)
-	private $max_files = 5;   	  //максимально допустимое кол-во файлов (ротация)
+	private $max_files = 5;   	  //максимально допустимое кол-во файлов в ротации
 	private $errors = array();    //массив ошибок
 	
 	
@@ -126,13 +126,13 @@ class Logger {
 					$i++;
 				}
 				
-				for ($j = $i; $j > 0; $j--) {
+				for ($j = ($i - 1); $j > 0; $j--) {
 					if (@!rename($this->file_name.'.'.$j, $this->file_name.'.'.($j+1))) {
 						$this->errors[] = 'Доступ на редактирования файлов закрыт';
 					}
 					
-					//удаляем файл если перваышем допустимый лимит на кол-во логов
-					if ($j > $this->max_files) {
+					//удаляем файл, если превышаем допустимый лимит на кол-во логов
+					if ( $j >= $this->max_files) {
 						@unlink($this->file_name.'.'.($j+1));
 					}
 				}
