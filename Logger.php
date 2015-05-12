@@ -19,13 +19,12 @@ class Logger {
 	public function __construct($file_name) {
 		
 		$file_name = trim($file_name);
+		$file_name = str_replace(self::root(), '', $file_name);
+		$file_name = trim($file_name);
 		
 		if (empty($file_name)) {
 			$this->errors[] = 'Не задан файл лога';
 		}
-		
-		$file_name = str_replace(self::root(), '', $file_name);
-		$file_name = trim($file_name);
 		
 		if (substr($file_name, 0, 1) == '/') {
 			$file_name = substr($file_name, 1);
