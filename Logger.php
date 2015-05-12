@@ -17,11 +17,13 @@ class Logger {
 	
 	
 	public function __construct($file_name) {
+		
+		$file_name = trim($file_name);
+		
 		if (empty($file_name)) {
 			$this->errors[] = 'Не задан файл лога';
 		}
 		
-		$file_name = trim($file_name);
 		$file_name = str_replace(self::root(), '', $file_name);
 		$file_name = trim($file_name);
 		
