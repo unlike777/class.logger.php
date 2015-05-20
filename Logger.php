@@ -35,7 +35,7 @@ class Logger {
 	
 	//вернет путь к корню сайта
 	private static function root() {
-		return getcwd();
+		return ROOT_DIR;
 	}
 	
 	/**
